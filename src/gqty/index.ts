@@ -53,6 +53,9 @@ export const client = createClient<
 
     subscribers.forEach((fn) => fn(lastData));
 
+    const waitTill = new Date(new Date().getTime() + 1 * 1000);
+    while (waitTill > new Date()) {}
+
     return {};
 
     // return {
@@ -88,7 +91,7 @@ const {
   defaults: {
     // Set this flag as "true" if your usage involves React Suspense
     // Keep in mind that you can overwrite it in a per-hook basis
-    suspense: false,
+    suspense: true,
 
     // Set this flag based on your needs
     staleWhileRevalidate: false,

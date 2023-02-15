@@ -1,35 +1,38 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "../gqty/";
+import { useQuery, User } from "../gqty/";
 
-export default function Component() {
+const FriendComp = ({ user, nest }: { user: User; nest: number }) => {
+  return nest > 0 ? (
+    <>
+      <li key={user.id}>{user.name}</li>
+      {user?.friends?.()?.map((friend) => (
+        <FriendComp key={friend.id ?? 0} user={friend} nest={nest - 1} />
+      ))}
+    </>
+  ) : null;
+};
+
+const useQueryRefetch = () => {
   const query = useQuery();
-  const [friendsVisible, setFriendsVisible] = useState(false);
-
-  console.log("buu");
   useEffect(() => {
-    const tmId = setInterval(() => {
-      console.log("buu");
+    const interval = setInterval(() => {
       query.$refetch();
     }, 1000);
-
     return () => {
-      clearInterval(tmId);
+      clearInterval(interval);
     };
-  }, [query]);
+  }, []);
+  return query;
+};
+
+export default function Component() {
+  const query = useQueryRefetch();
+  const [friendsVisible, setFriendsVisible] = useState(false);
 
   return (
     <>
       <div className="hidden text-white">
-        Hello {query.me.name}!
-        {friendsVisible && (
-          <ol>
-            {query.me.friends({ skip: 1, size: 10 }).map((user) => {
-              user.friends({ skip: 1, size: 10 }).map((user) => {
-                return <li key={user.id}>{user.name}</li>;
-              });
-            })}
-          </ol>
-        )}
+        {friendsVisible && <FriendComp user={query.me} nest={8} />}
       </div>
 
       <button
