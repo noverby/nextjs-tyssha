@@ -30,7 +30,6 @@ export const client = createClient<
   queryFetcher: async (query, variables) => {
     console.log(query);
     const data = { me: getData(0), __typename: "Query" };
-    console.log(JSON.stringify(data));
     return {
       data,
     };

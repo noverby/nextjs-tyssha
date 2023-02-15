@@ -2,9 +2,8 @@ import { Suspense, useEffect, useState } from "react";
 import { useQuery, User } from "../gqty/";
 
 const FriendComp = ({ user, nest }: { user: User; nest: number }) => {
-  console.log(user.name);
+  //console.log(user.name);
 
-  // delay 500 ms 
   const waitTill = new Date(new Date().getTime() + 1000);
   while (waitTill > new Date()) {}
 
