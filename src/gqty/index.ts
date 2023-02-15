@@ -4,35 +4,21 @@
 
 import { createReactClient } from "@gqty/react";
 import { createClient } from "gqty";
+import { stringify } from "querystring";
 import type {
   GeneratedSchema,
   SchemaObjectTypes,
   SchemaObjectTypesNames,
 } from "./schema.generated";
 import { generatedSchema, scalarsEnumsHash } from "./schema.generated";
-import { parse, print } from "graphql";
 
-let dedupeHash = "";
-let lastData:
-  | {
-      query: string;
-      variables: Record<string, any>;
-    }
-  | undefined;
-
-const subscribers = new Set<(data: any) => void>();
-
-export const subscribeQueryStore = (callback: (data: any) => void) => {
-  subscribers.add(callback);
-
-  callback(lastData);
-
-  return () => {
-    subscribers.delete(callback);
+const getData = (nest) => {
+  return {
+    __typename: "User",
+    name: `John Doe ${nest}`,
+    ...(nest > 0 ? { friends: [getData(nest - 1)] } : {}),
   };
 };
-
-export const getLastQuery = () => lastData;
 
 export const client = createClient<
   GeneratedSchema,
@@ -42,31 +28,12 @@ export const client = createClient<
   schema: generatedSchema,
   scalarsEnumsHash,
   queryFetcher: async (query, variables) => {
-    if (dedupeHash === query) return {};
-
-    dedupeHash = query;
-
-    lastData = {
-      query: print(parse(query)),
-      variables,
+    console.log(query);
+    const data = { me: getData(0), __typename: "Query" };
+    console.log(JSON.stringify(data));
+    return {
+      data,
     };
-
-    subscribers.forEach((fn) => fn(lastData));
-
-    const waitTill = new Date(new Date().getTime() + 1 * 1000);
-    while (waitTill > new Date()) {}
-
-    return {};
-
-    // return {
-    //   data: {
-    //     me: {
-    //       id: "1",
-    //       name: "John Doe",
-    //       friends: [{ id: "2", name: "Jane Doe" }],
-    //     },
-    //   },
-    // };
   },
 });
 

@@ -1,15 +1,24 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useQuery, User } from "../gqty/";
 
 const FriendComp = ({ user, nest }: { user: User; nest: number }) => {
-  return nest > 0 ? (
+  console.log(user.name);
+
+  // delay 500 ms 
+  const waitTill = new Date(new Date().getTime() + 1000);
+  while (waitTill > new Date()) {}
+
+  return (
     <>
       <li key={user.id}>{user.name}</li>
-      {user?.friends?.()?.map((friend) => (
-        <FriendComp key={friend.id ?? 0} user={friend} nest={nest - 1} />
-      ))}
+      {nest > 0 &&
+        user
+          ?.friends?.()
+          ?.map((friend) => (
+            <FriendComp key={friend.id ?? 0} user={friend} nest={nest - 1} />
+          ))}
     </>
-  ) : null;
+  );
 };
 
 const useQueryRefetch = () => {
@@ -22,19 +31,21 @@ const useQueryRefetch = () => {
       clearInterval(interval);
     };
   }, []);
+  query.__typename;
   return query;
 };
 
-export default function Component() {
+const ComponentSuspense = () => {
   const query = useQueryRefetch();
+
+  return <FriendComp user={query.me} nest={0} />;
+};
+
+export default function Component() {
   const [friendsVisible, setFriendsVisible] = useState(false);
 
   return (
     <>
-      <div className="hidden text-white">
-        {friendsVisible && <FriendComp user={query.me} nest={8} />}
-      </div>
-
       <button
         className="rounded bg-gray(300 hover:400 active:500) text-black px-3 py-1"
         onClick={() => {
@@ -43,6 +54,9 @@ export default function Component() {
       >
         Toggle Friends
       </button>
+      <Suspense fallback="suspense">
+        {friendsVisible && <ComponentSuspense />}
+      </Suspense>
     </>
   );
 }
