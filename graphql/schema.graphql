@@ -1,0 +1,15 @@
+# Note: After editing this file, head to terminal at the bottom and re-generate.
+
+# Step 1: Hit CTRL+C to stop the server.
+# Step 2: Run `yarn generate` to re-generate types from this schema.
+# Step 3: Run `yarn dev` to start the server again.
+
+type Query {
+  me: User!
+}
+
+type User {
+  id: ID!
+  name: String!
+  friends(skip: Int, size: Int): [User!]!
+}
